@@ -2,6 +2,7 @@ package hello;
 
 import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -56,7 +57,7 @@ public class GreetingController {
 	    }
     }
     
-    @RequestMapping("/asset")
+    @RequestMapping(value = "/asset", method = RequestMethod.POST)
     public Asset postAsset(Asset createAsset) {
     	
     	try {
@@ -86,11 +87,11 @@ public class GreetingController {
 
             String assetSubNo = exports.getString("EV_SUBNUMBER");
      	
-            return new Asset(createAsset.getCompanyCode(), assetMainNo, createAsset.getDescription());
+            return new Asset(createAsset.getCompanyCode(), createAsset.getAssetClass(), assetMainNo, createAsset.getDescription());
         	}
     	    catch (JCoException e) {
     	
-    	    	return new Asset(null, null, null);
+    	    	return new Asset(null,null, null, null);
 
     	    }
     	  	

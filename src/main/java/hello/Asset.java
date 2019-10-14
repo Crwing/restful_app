@@ -7,9 +7,10 @@ public class Asset {
     private String assetNum;
     private String description;
 
-    public Asset(String companyCode, String assetNum, String description) {
+    public Asset(String companyCode, String assetClass, String assetNum, String description) {
 
         this.companyCode = companyCode;
+        this.assetClass = assetClass;
         this.assetNum = assetNum;
         this.description = description;
     }
