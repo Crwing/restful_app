@@ -1,6 +1,8 @@
 package hello;
 
 import java.util.concurrent.atomic.AtomicLong;
+
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -57,8 +59,47 @@ public class GreetingController {
 	    }
     }
     
+    @RequestMapping(value = "/greeting", method = RequestMethod.POST) 
+    public Asset postgreeting(@RequestParam(value="name", defaultValue="World") String name)  {
+    	
+    	try {
+        	// access the RFC Destination "JCoDemoSystem"
+
+            JCoDestination destination = JCoDestinationManager.getDestination("ldcisd4rfc");
+
+            // make an invocation of STFC_CONNECTION in the backend;
+
+            JCoRepository repo = destination.getRepository();
+
+            JCoFunction stfcConnection = repo.getFunction("ZBAPI_CREATE_ASSET");
+
+            JCoParameterList imports = stfcConnection.getImportParameterList();
+
+            imports.setValue("IV_COMPANYCODE", "A001");
+            
+            imports.setValue("IV_ASSETCLASS", "00003100");
+            
+            imports.setValue("IV_DESCRIPTION", "Test by my app");
+
+            stfcConnection.execute(destination);
+
+            JCoParameterList exports = stfcConnection.getExportParameterList();
+
+            String assetMainNo = exports.getString("EV_ASSETMAINO");
+
+            String assetSubNo = exports.getString("EV_SUBNUMBER");
+     	
+            return new Asset("A001", "00003100", assetMainNo, "Test by my app");
+        	}
+    	    catch (JCoException e) {
+    	
+    	    	return new Asset(null,null, null, null);
+
+    	    }
+    }
+    
     @RequestMapping(value = "/asset", method = RequestMethod.POST)
-    public Asset postAsset(Asset createAsset) {
+    public Asset postAsset(@RequestBody Asset createAsset) {
     	
     	try {
         	// access the RFC Destination "JCoDemoSystem"
