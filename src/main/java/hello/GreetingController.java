@@ -55,4 +55,44 @@ public class GreetingController {
 
 	    }
     }
+    
+    @RequestMapping("/asset")
+    public Asset postAsset(Asset createAsset) {
+    	
+    	try {
+        	// access the RFC Destination "JCoDemoSystem"
+
+            JCoDestination destination = JCoDestinationManager.getDestination("ldcisd4rfc");
+
+            // make an invocation of STFC_CONNECTION in the backend;
+
+            JCoRepository repo = destination.getRepository();
+
+            JCoFunction stfcConnection = repo.getFunction("ZBAPI_CREATE_ASSET");
+
+            JCoParameterList imports = stfcConnection.getImportParameterList();
+
+            imports.setValue("IV_COMPANYCODE", createAsset.getCompanyCode());
+            
+            imports.setValue("IV_ASSETCLASS", createAsset.getAssetClass());
+            
+            imports.setValue("IV_DESCRIPTION", createAsset.getDescription());
+
+            stfcConnection.execute(destination);
+
+            JCoParameterList exports = stfcConnection.getExportParameterList();
+
+            String assetMainNo = exports.getString("EV_ASSETMAINO");
+
+            String assetSubNo = exports.getString("EV_SUBNUMBER");
+     	
+            return new Asset(createAsset.getCompanyCode(), assetMainNo, createAsset.getDescription());
+        	}
+    	    catch (JCoException e) {
+    	
+    	    	return new Asset(null, null, null);
+
+    	    }
+    	  	
+    }
 }
