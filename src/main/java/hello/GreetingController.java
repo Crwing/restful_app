@@ -15,6 +15,7 @@ import com.sap.conn.jco.JCoException;
 import com.sap.conn.jco.JCoFunction;
 import com.sap.conn.jco.JCoParameterList;
 import com.sap.conn.jco.JCoRepository;
+import com.sap.conn.jco.JCoStructure;
 
 @RestController
 public class GreetingController {
@@ -129,6 +130,46 @@ public class GreetingController {
             String assetSubNo = exports.getString("EV_SUBNUMBER");
      	
             return new Asset(createAsset.getCompanyCode(), createAsset.getAssetClass(), assetMainNo, createAsset.getDescription());
+        	}
+    	    catch (JCoException e) {
+    	
+    	    	return new Asset(null,null, null, null);
+
+    	    }
+    	  	
+    }
+    
+    @RequestMapping(value = "/asset", method = RequestMethod.GET)
+    public Asset getAsset(@RequestParam String companyCode, @RequestParam String assetMainNo) {
+    	
+    	try {
+        	// access the RFC Destination "JCoDemoSystem"
+
+            JCoDestination destination = JCoDestinationManager.getDestination("ldcisd4rfc");
+
+            // make an invocation of STFC_CONNECTION in the backend;
+
+            JCoRepository repo = destination.getRepository();
+
+            JCoFunction stfcConnection = repo.getFunction("BAPI_FIXEDASSET_GETDETAIL");
+
+            JCoParameterList imports = stfcConnection.getImportParameterList();
+
+            imports.setValue("COMPANYCODE", companyCode);
+            
+            imports.setValue("ASSET", assetMainNo);
+            
+            imports.setValue("SUBNUMBER", "0000");
+
+            stfcConnection.execute(destination);
+
+            JCoParameterList exports = stfcConnection.getExportParameterList();
+            
+            JCoStructure bapiBasicData = exports.getStructure("BASIC_DATA");
+            
+            JCoStructure bapiOrgData = exports.getStructure("ORGANIZATIONAL_DATA");
+            
+            return new Asset(companyCode, bapiOrgData.getString("ASSETCLASS"), assetMainNo, bapiBasicData.getString("DESCRIPT"));
         	}
     	    catch (JCoException e) {
     	
